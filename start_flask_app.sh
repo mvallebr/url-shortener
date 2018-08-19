@@ -19,21 +19,10 @@ do
   sleep 2
 done
 
->&2 echo "Cassandra is up - Creating keyspace"
-python -c "${PYTHON_CONNECT_CMD}; \
-session.execute(\"DROP KEYSPACE IF EXISTS url_shortener\"); \
-session.execute(\"CREATE KEYSPACE url_shortener \
-    WITH REPLICATION = {'class' : 'SimpleStrategy','replication_factor' : 1}\
-    \"); "
 
->&2 echo "Creating tables"
-# short_id is a 32 bit integer
-python -c "${PYTHON_CONNECT_CMD}; \
-session.execute(\"CREATE TABLE url_shortener.url_alias (\
-    short_id int, original_url text, \
-    PRIMARY KEY (short_id)) \
-    \"); \
-"
-
+export FLASK_APP=rest_api
+export FLASK_ENV=development
+>&2 echo "Creating Cassandra keyspace and tables"
+flask init-db
 >&2 echo "Executing flask service"
-exec python url_shortener_rest.py
+flask run -h 0.0.0.0  # be visible outside docker

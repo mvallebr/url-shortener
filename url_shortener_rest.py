@@ -3,14 +3,14 @@ from flask import Flask
 
 app = Flask(__name__)
 
-cluster = Cluster([])
-session = cluster.connect('url-shortener')
+cluster = Cluster(['cassandra'])
+session = cluster.connect('url_shortener')
 
 
 def insert_short_url():
     session.execute(
         """
-        INSERT INTO short-url (short-id, original-url)
+        INSERT INTO url_alias (short_id, original_url)
         VALUES (%s, %s)
         """,
         (42, "http://example.com/example/folder/file")
@@ -20,7 +20,7 @@ def insert_short_url():
 @app.route('/')
 def hello():
     insert_short_url()
-    return ("Hello World! ")
+    return "Hello World! "
 
 
 if __name__ == "__main__":

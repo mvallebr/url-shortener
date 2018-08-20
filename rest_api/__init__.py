@@ -16,7 +16,7 @@ def create_app(test_config=None):
     app.logger.addHandler(console_handler)
 
     app.config.from_mapping(
-        CASSANDRA_ENDPOINTS=['172.18.0.2'],#, 'cassandra'],
+        CASSANDRA_ENDPOINTS=['cassandra'],
         CASSANDRA_KEYSPACE='url_shortener',
         SHORT_URL_PREFIX="http://localhost:5000/",
         INSTANCE_ID=1,  # This parameter should be different for every worker process on every node.

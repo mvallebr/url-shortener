@@ -36,7 +36,6 @@ def get_original_url(short_id: int) -> str:
 def init_db_command():
     """Execute the DDL for the keyspace."""
     session = get_cassandra_session()
-
     with current_app.open_resource('schema.cql', mode='r') as f:
         for stmt in f.read().split(";"):
             stmt = stmt.strip()

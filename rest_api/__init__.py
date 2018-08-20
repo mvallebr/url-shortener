@@ -1,4 +1,5 @@
 import logging
+import os
 
 from flask import Flask
 
@@ -15,8 +16,9 @@ def create_app(test_config=None):
     console_handler.setFormatter(formatter)
     app.logger.addHandler(console_handler)
 
+    # default config
     app.config.from_mapping(
-        CASSANDRA_ENDPOINTS=['cassandra'],
+        CASSANDRA_ENDPOINTS=[os.environ.get('CASSANDRA_ENDPOINT', 'cassandra')],
         CASSANDRA_KEYSPACE='url_shortener',
         SHORT_URL_PREFIX="http://localhost:5000/",
         INSTANCE_ID=1,  # This parameter should be different for every worker process on every node.

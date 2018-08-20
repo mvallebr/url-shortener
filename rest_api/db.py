@@ -8,7 +8,7 @@ from flask.cli import with_appcontext
 
 def get_cassandra_session():
     if 'cassandra_session' not in g:
-        cluster = Cluster(current_app.config['CASSANDRA_ENDPOINTS'])  # current_app.config['CASSANDRA_ENDPOINTS']
+        cluster = Cluster(current_app.config['CASSANDRA_ENDPOINTS'])
         session = cluster.connect(current_app.config['CASSANDRA_KEYSPACE'])
         g.cassandra_session = session
         g.url_lookup_stmt = session.prepare("SELECT original_url FROM url_shortener.url_alias WHERE short_id=?")
@@ -35,7 +35,8 @@ def get_original_url(short_id: int) -> str:
 @with_appcontext
 def init_db_command():
     """Execute the DDL for the keyspace."""
-    session = get_cassandra_session()
+    cluster = Cluster(current_app.config['CASSANDRA_ENDPOINTS'])
+    session = cluster.connect()
     with current_app.open_resource('schema.cql', mode='r') as f:
         for stmt in f.read().split(";"):
             stmt = stmt.strip()

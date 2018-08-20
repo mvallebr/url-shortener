@@ -11,11 +11,30 @@ def get_cassandra_session():
         cluster = Cluster(current_app.config['CASSANDRA_ENDPOINTS'])  # current_app.config['CASSANDRA_ENDPOINTS']
         session = cluster.connect(current_app.config['CASSANDRA_KEYSPACE'])
         g.cassandra_session = session
+        g.url_lookup_stmt = session.prepare("SELECT original_url FROM url_shortener.url_alias WHERE short_id=?")
 
     return g.cassandra_session
 
 
-def init_cassandra_keyspace():
+def insert_short_url(short_id: int, original_url: str):
+    get_cassandra_session().execute(
+        """
+        INSERT INTO url_shortener.url_alias (short_id, original_url)
+        VALUES (%s, %s)
+        """,
+        (short_id, original_url)
+    )
+
+
+def get_original_url(short_id: int) -> str:
+    result = get_cassandra_session().execute(g.url_lookup_stmt, (short_id,)).current_rows
+    return result[0].original_url if len(result) > 0 else None
+
+
+@click.command('init-db')
+@with_appcontext
+def init_db_command():
+    """Execute the DDL for the keyspace."""
     session = get_cassandra_session()
 
     with current_app.open_resource('schema.cql', mode='r') as f:
@@ -25,13 +44,6 @@ def init_cassandra_keyspace():
                 continue
             logging.info("Executing {}".format(stmt))
             session.execute(stmt)
-
-
-@click.command('init-db')
-@with_appcontext
-def init_db_command():
-    """Clear the existing data and create new tables."""
-    init_cassandra_keyspace()
     click.echo('Initialized the Cassandra keyspace.')
 
 

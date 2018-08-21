@@ -1,9 +1,8 @@
-import json
-import logging
 import sys
-from urllib.parse import urlparse
 
+import json
 from flask import make_response, jsonify, request, Blueprint, redirect, Response, current_app
+from urllib.parse import urlparse
 
 from rest_api import db
 

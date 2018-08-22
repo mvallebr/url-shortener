@@ -15,7 +15,7 @@ sleep 7
 
 until python -c "${PYTHON_CONNECT_CMD}"
 do
-  >&2 echo "Cassandra is unavailable - sleeping"
+  >&2 echo "Cassandra is unavailable (${CASSANDRA_HOST}) - sleeping"
   sleep 2
 done
 

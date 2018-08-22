@@ -6,4 +6,4 @@ RUN pip install -r /req/requirements.txt
 COPY . /code
 WORKDIR /code
 
-RUN ["./start_flask_app.sh" ]
+CMD ["./run_flask_app.sh" ]

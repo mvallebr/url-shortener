@@ -31,10 +31,7 @@ def get_original_url(short_id: int) -> str:
     return result[0].original_url if len(result) > 0 else None
 
 
-@click.command('init-db')
-@with_appcontext
-def init_db_command():
-    """Execute the DDL for the keyspace."""
+def init_db():
     cluster = Cluster(current_app.config['CASSANDRA_ENDPOINTS'])
     session = cluster.connect()
     with current_app.open_resource('schema.cql', mode='r') as f:
@@ -44,6 +41,12 @@ def init_db_command():
                 continue
             logging.info("Executing {}".format(stmt))
             session.execute(stmt)
+
+@click.command('init-db')
+@with_appcontext
+def init_db_command():
+    """Execute the DDL for the keyspace."""
+    init_db()
     click.echo('Initialized the Cassandra keyspace.')
 
 

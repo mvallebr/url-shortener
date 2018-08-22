@@ -1,4 +1,6 @@
 import json
+import logging
+
 import pytest
 
 from rest_api import create_app
@@ -36,10 +38,14 @@ def test_insert_shorturl_validation_ok(client):
     rv = client.post("/shorten_url", data='{"url": "www.helloworld.com"}')
     assert rv.status_code == 201
     print("received post data = {}".format(rv.data))
-    expected = {"shortened_url": "http://localhost:5000/1234"}
+    expected = {"shortened_url": "http://localhost:5000/AQE="}
     actual = json.loads(rv.data)
 
     assert expected == actual
+
+    rv2 = client.get("/AQE=")
+    assert rv2.status_code == 301
+    assert rv2.headers['Location'] == "http://www.helloworld.com"
 
 
 if __name__ == "__main__":

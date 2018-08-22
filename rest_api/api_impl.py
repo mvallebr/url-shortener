@@ -28,9 +28,11 @@ def shorten_url():
     return Response(json.dumps(response), status=201, mimetype='application/json')
 
 
-@api.route('/<int:short_id>', methods=['GET'])
+@api.route('/<string:short_id>', methods=['GET'])
 def get_url(short_id):
     current_app.logger.debug("short_id = {}  {}".format(short_id, decode_short_id(short_id)))
+    current_app.logger.error("short_id = {}  {}".format(short_id, decode_short_id(short_id)))
+    print("short_id = {}  {}".format(short_id, decode_short_id(short_id)))
     original_url = db.get_original_url(decode_short_id(short_id))
     current_app.logger.debug("original_url = {}".format(original_url))
     if original_url is None:

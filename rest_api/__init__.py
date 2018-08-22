@@ -1,20 +1,13 @@
-import logging
 import os
-
 from flask import Flask
 
 from rest_api.api_impl import api
+from rest_api.id_cache import INSTANCE_ID_MASK
 
 
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
-
-    # console_handler = logging.StreamHandler()
-    # console_handler.setLevel(logging.DEBUG)
-    # formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    # console_handler.setFormatter(formatter)
-    # app.logger.addHandler(console_handler)
 
     # default config
     app.config.from_mapping(
@@ -25,7 +18,7 @@ def create_app(test_config=None):
     )
 
     if test_config is None:
-        # load the instance config, if it exists, when not testing
+        # in prod, config.py would be used instead
         app.config.from_pyfile('config.py', silent=True)
     else:
         # load the test config if passed in
@@ -33,7 +26,9 @@ def create_app(test_config=None):
 
     from . import db
     db.init_app(app)
-
     app.register_blueprint(api)
+
+    if app.config['INSTANCE_ID'] > INSTANCE_ID_MASK:
+        raise Exception("Instance id can't be more than {}".format(INSTANCE_ID_MASK))
 
     return app

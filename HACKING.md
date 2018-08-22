@@ -14,5 +14,9 @@ To start the app so you can access the endpoint from your machine, run instead:
 docker-compose up
 ```
 
-And then point your browser to `http://localhost:5000/` to access the app. You can use this to call the app using curl, 
-for instance. 
+And then point your browser to `http://localhost:5000/` to access the app. You can use this to call the app using curl.
+For instance:
+
+```bash
+curl -d '{"url": "www.helloworld.com"}' -H "Content-Type: application/json" -X POST http://localhost:5000/shorten_url
+``` 

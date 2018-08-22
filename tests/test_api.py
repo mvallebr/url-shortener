@@ -1,3 +1,4 @@
+import json
 import pytest
 
 from rest_api import create_app
@@ -8,15 +9,16 @@ from rest_api.db import init_db
 def app():
     """Create and configure a new app instance for each test."""
     # create the app with common test config
-    app = create_app({
+    _app = create_app({
         'TESTING': True,
+        'DEBUG': True,
     })
 
     # create the database and load test data
-    with app.app_context():
-        init_db() 
+    with _app.app_context():
+        init_db()
 
-    yield app
+    yield _app
 
 
 @pytest.fixture
@@ -25,11 +27,19 @@ def client(app):
     return app.test_client()
 
 
-def test_empty_db(client):
-    """Start with a blank database."""
-
+def test_root_endpoint(client):
     rv = client.get('/')
-    assert b'No entries here so far' in rv.data
+    assert b'Welcome to url-shortnener' == rv.data
+
+
+def test_insert_shorturl_validation_ok(client):
+    rv = client.post("/shorten_url", data='{"url": "www.helloworld.com"}')
+    assert rv.status_code == 201
+    print("received post data = {}".format(rv.data))
+    expected = {"shortened_url": "http://localhost:5000/1234"}
+    actual = json.loads(rv.data)
+
+    assert expected == actual
 
 
 if __name__ == "__main__":

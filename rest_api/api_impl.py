@@ -1,10 +1,9 @@
-import sys
-
 import json
 from flask import make_response, jsonify, request, Blueprint, redirect, Response, current_app
 from urllib.parse import urlparse
 
-from rest_api import db
+from rest_api import db, id_cache
+from rest_api.url_logic import encode_short_id, decode_short_id
 
 api = Blueprint("api", __name__)
 
@@ -21,22 +20,19 @@ def _validate(url: str):
 # curl -d '{"url": "www.helloworld.com"}' -H "Content-Type: application/json" -X POST http://localhost:5000/shorten_url
 @api.route('/shorten_url', methods=['POST'])
 def shorten_url():
-    print(request.content_type)
     contents = request.get_json(force=True)
-    print(contents)
     original_url = contents["url"]
-    db.insert_short_url(123, original_url)
-    response = {"shortened_url": "{}123".format(current_app.config['SHORT_URL_PREFIX'])}
+    short_id = id_cache.get_a_new_id()
+    db.upsert_short_url(short_id, original_url)
+    response = {"shortened_url": "{}{}".format(current_app.config['SHORT_URL_PREFIX'], encode_short_id(short_id))}
     return Response(json.dumps(response), status=201, mimetype='application/json')
 
 
 @api.route('/<int:short_id>', methods=['GET'])
 def get_url(short_id):
-    print("short_id = {}".format(short_id), file=sys.stdout)
-    current_app.logger.info("short_id = {}".format(short_id))
-    original_url = db.get_original_url(short_id)
-    current_app.logger.error("original_url = {}".format(original_url))
-    print("original_url = {}".format(original_url), file=sys.stdout)
+    current_app.logger.debug("short_id = {}  {}".format(short_id, decode_short_id(short_id)))
+    original_url = db.get_original_url(decode_short_id(short_id))
+    current_app.logger.debug("original_url = {}".format(original_url))
     if original_url is None:
         return make_response(jsonify({'error': 'Not found {}'.format(short_id)}), 404)
     else:
@@ -47,5 +43,4 @@ def get_url(short_id):
 
 @api.route('/')
 def hello():
-    print("hello", file=sys.stdout)
-    return "Hello World! "
+    return "Welcome to url-shortnener"  # TODO show user docs on this endpoint

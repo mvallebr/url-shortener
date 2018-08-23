@@ -1,6 +1,22 @@
 import base64
 
 
+# only the first byte of instance id is considered, which means we can have 256 max process in the cluster.
+# If there is intention of increasing the number of machines, this mask has to be changed.
+INSTANCE_ID_MASK = 255
+INSTANCE_ID_NUM_BITS = 8
+
+
+def concatenate_instance(instance_id: int, current_id: int) -> int:
+    """
+    The short url id reserves a fixed number of bytes for the instance and the remaining part is the current_id for the
+    instance. The objective is to get a result url which is as short as possible.
+    :param instance_id: instance id of this running process - this should come from config
+    :param current_id: the current id for the instance
+    :return: the concatenated id according to the rules above.
+    """
+    return (instance_id & INSTANCE_ID_MASK) + (current_id << INSTANCE_ID_NUM_BITS)
+
 def encode_short_id(short_id: int) -> str:
     """
     Encodes a short id in the shortest way possible it can be represented in the url.

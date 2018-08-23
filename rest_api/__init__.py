@@ -1,8 +1,10 @@
 import os
+
 from flask import Flask
 
+from rest_api import id_cache
 from rest_api.api_impl import api
-from rest_api.id_cache import INSTANCE_ID_MASK
+from rest_api.url_logic import INSTANCE_ID_MASK
 
 
 def create_app(test_config=None):
@@ -26,6 +28,7 @@ def create_app(test_config=None):
 
     from . import db
     db.init_app(app)
+    id_cache.cache.clear()  # Make sure cache is cleared
     app.register_blueprint(api)
 
     if app.config['INSTANCE_ID'] > INSTANCE_ID_MASK:

@@ -15,24 +15,9 @@ on disk with many versions, most compacting will happen in memory, before the fl
 from flask import current_app
 
 from rest_api import db
+from rest_api.url_logic import concatenate_instance
 
 cache = {}
-
-# only the first byte of instance id is considered, which means we can have 256 max process in the cluster.
-# If there is intention of increasing the number of machines, this mask has to be changed.
-INSTANCE_ID_MASK = 255
-INSTANCE_ID_NUM_BITS = 8
-
-
-def _concatenate_instance(instance_id: int, current_id: int) -> int:
-    """
-    The short url id reserves a fixed number of bytes for the instance and the remaining part is the current_id for the
-    instance. The objective is to get a result url which is as short as possible.
-    :param instance_id: instance id of this running process - this should come from config
-    :param current_id: the current id for the instance
-    :return: the concatenated id according to the rules above.
-    """
-    return (instance_id & INSTANCE_ID_MASK) + (current_id << INSTANCE_ID_NUM_BITS)
 
 
 def get_a_new_id() -> int:
@@ -47,4 +32,4 @@ def get_a_new_id() -> int:
     cache["id"] = current_id
 
     db.upsert_current_id(instance_id, current_id)
-    return _concatenate_instance(instance_id, current_id)
+    return concatenate_instance(instance_id, current_id)

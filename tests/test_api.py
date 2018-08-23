@@ -1,5 +1,4 @@
 import json
-import logging
 
 import pytest
 
@@ -34,18 +33,32 @@ def test_root_endpoint(client):
     assert b'Welcome to url-shortnener' == rv.data
 
 
-def test_insert_shorturl_validation_ok(client):
-    rv = client.post("/shorten_url", data='{"url": "www.helloworld.com"}')
+def _test_post(client, url: str, expected_short_id: str):
+    rv = client.post("/shorten_url", data=json.dumps({"url": url}))
     assert rv.status_code == 201
-    print("received post data = {}".format(rv.data))
-    expected = {"shortened_url": "http://localhost:5000/AQE="}
+    expected = {"shortened_url": "http://localhost:5000/{}".format(expected_short_id)}
     actual = json.loads(rv.data)
-
     assert expected == actual
 
-    rv2 = client.get("/AQE=")
+
+def _test_get(client, short_id: str, expected_url: str):
+    rv2 = client.get(short_id)
     assert rv2.status_code == 301
-    assert rv2.headers['Location'] == "http://www.helloworld.com"
+    assert rv2.headers['Location'] == expected_url
+
+
+def test_insert_shorturl_validation_ok(client):
+    _test_post(client, url="www.helloworld.com", expected_short_id="AQE=")
+    _test_get(client, short_id="/AQE=", expected_url="http://www.helloworld.com")
+
+
+def test_happy_path_in_sequence(client):
+    _test_post(client, url="www.helloworld.com", expected_short_id="AQE=")
+    _test_get(client, short_id="/AQE=", expected_url="http://www.helloworld.com")
+    _test_post(client, url="https://www.google.com", expected_short_id="AQI=")
+    _test_get(client, short_id="AQI=", expected_url="https://www.google.com")
+    _test_post(client, url="http://www.uol.com.br", expected_short_id="AQM=")
+    _test_get(client, short_id="AQM=", expected_url="http://www.uol.com.br")
 
 
 if __name__ == "__main__":

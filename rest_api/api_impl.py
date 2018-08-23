@@ -1,6 +1,7 @@
 import json
-from flask import make_response, jsonify, request, Blueprint, redirect, Response, current_app
 from urllib.parse import urlparse
+
+from flask import make_response, jsonify, request, Blueprint, redirect, Response, current_app
 
 from rest_api import db, id_cache
 from rest_api.url_logic import encode_short_id, decode_short_id
@@ -30,11 +31,7 @@ def shorten_url():
 
 @api.route('/<string:short_id>', methods=['GET'])
 def get_url(short_id):
-    current_app.logger.debug("short_id = {}  {}".format(short_id, decode_short_id(short_id)))
-    current_app.logger.error("short_id = {}  {}".format(short_id, decode_short_id(short_id)))
-    print("short_id = {}  {}".format(short_id, decode_short_id(short_id)))
     original_url = db.get_original_url(decode_short_id(short_id))
-    current_app.logger.debug("original_url = {}".format(original_url))
     if original_url is None:
         return make_response(jsonify({'error': 'Not found {}'.format(short_id)}), 404)
     else:

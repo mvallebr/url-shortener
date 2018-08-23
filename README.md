@@ -16,7 +16,7 @@ body:
 response body:
 ```json
 {
-"shortened_url": 'http://www.your_service.com/ouoYFY48'
+"shortened_url": "http://www.your_service.com/ouoYFY48"
 }
 ```
 3. `GET http://www.your_service.com/AQE=` -> `hello world`

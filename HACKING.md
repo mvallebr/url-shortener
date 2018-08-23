@@ -18,5 +18,5 @@ And then point your browser to `http://localhost:5000/` to access the app. You c
 For instance:
 
 ```bash
-curl -d '{"url": "www.helloworld.com"}' -H "Content-Type: application/json" -X POST http://localhost:5000/shorten_url
+curl -d '{"url": "www.helloworld.com"}' -H "Content-Type: application/json" -H "Accept: application/json" -X POST http://localhost:5000/shorten_url
 ``` 

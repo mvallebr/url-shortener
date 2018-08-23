@@ -1,15 +1,28 @@
 import os
-
-from flask import Flask
+from flask import Flask, make_response, jsonify
+from rfc3986.exceptions import RFC3986Exception
+from werkzeug.exceptions import NotAcceptable
 
 from rest_api import id_cache
 from rest_api.api_impl import api
 from rest_api.url_logic import INSTANCE_ID_MASK
 
+# Register error handlers for expected errors
+ERROR_HANDLERS = [(NotAcceptable, "", 406), (406, "", 406), (404, "Not Found", 404),
+                  (Exception, "Internal Server Error", 500), (RFC3986Exception, "Bad Request", 400), ]
+
+
+def register_default_error_handlers(app):
+    for code_or_exception, description, code in ERROR_HANDLERS:
+        app.register_error_handler(code_or_exception,
+                                   lambda e: make_response(jsonify({'error': "{} {}".format(description, e)}), code))
+
+
 
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
+    # register_default_error_handlers(app)
 
     # default config
     app.config.from_mapping(

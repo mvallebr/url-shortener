@@ -26,7 +26,7 @@ pluggy==0.7.1
 py==1.10.0
 pytest==3.7.2
 PyYAML==5.4
-requests==2.20.0
+requests==2.31.0
 rfc3986==1.1.0
 six==1.11.0
 texttable==0.9.1
